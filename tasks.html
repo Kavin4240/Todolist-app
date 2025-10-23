@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background-color: #f5f0e1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: #dff0c7;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 400px;
+    }
+    h2 {
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0;
+    }
+    li {
+      background: #f8f8f8;
+      padding: 8px;
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 5px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    li.completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .task-info {
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #555;
+    }
+    button {
+      border: none;
+      color: white;
+      padding: 5px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 3px;
+      font-size: 16px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .complete {
+      background-color: #28a745;
+    }
+    .edit {
+      background-color: #007bff;
+    }
+    .delete {
+      background-color: #dc3545;
+    }
+    .clear {
+      background-color: #ff9900;
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px;
+    }
+    a {
+      text-decoration: none;
+      color: #007bff;
+      display: block;
+      text-align: center;
+      margin-top: 10px;
+    }
+    button:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>List of Tasks</h2>
+    <ul id="taskList"></ul>
+    <button class="clear" onclick="clearData()">Clear All Tasks</button>
+    <a href="index.html">← Add New Task</a>
+  </div>
+  <script>
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        if (task.completed) li.classList.add('completed');      
+        const taskText = document.createElement('div');
+        taskText.textContent = task.text;
+        li.appendChild(taskText); 
+        const taskInfo = document.createElement('div');
+        taskInfo.className = 'task-info';
+        taskInfo.textContent = `From: ${task.from} | To: ${task.to}`;
+        li.appendChild(taskInfo);
+
+        // Mark as complete/incomplete
+        const actions = document.createElement('div');
+        const completeBtn = document.createElement('button');
+        completeBtn.innerHTML = task.completed ? '🔁' : '✅';
+        completeBtn.className = 'complete';
+        completeBtn.title = task.completed ? 'Mark as Incomplete' : 'Mark as Complete';
+        completeBtn.onclick = function() {
+          tasks[index].completed = !tasks[index].completed;
+          saveTasks();
+          renderTasks();
+        };
+        // Edit icon
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '✏️';
+        editBtn.className = 'edit';
+        editBtn.title = 'Edit Task';
+        editBtn.onclick = function() {
+          const newText = prompt('Edit your task:', task.text);
+          if (newText && newText.trim() !== '') {
+            tasks[index].text = newText.trim();
+            saveTasks();
+            renderTasks();
+          }
+        };
+        //Delete icon
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '❌';
+        delBtn.className = 'delete';
+        delBtn.title = 'Delete Task';
+        delBtn.onclick = function() {
+          tasks.splice(index, 1);
+          saveTasks();
+          renderTasks();
+        };
+        actions.appendChild(completeBtn);
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+        li.appendChild(actions);
+        list.appendChild(li);
+      });
+    }
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+    function clearData() {
+      if (confirm('Are you sure you want to clear all tasks?')) {
+        tasks = [];
+        saveTasks();
+        renderTasks();
+      }
+    }
+    renderTasks();
+  </script>
+</body>
+</html>
